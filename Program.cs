@@ -1,4 +1,6 @@
-﻿public class SayaTubeVideo
+﻿using System.Diagnostics.Contracts;
+
+public class SayaTubeVideo
 {
     private int id;
     private String title;
@@ -6,6 +8,12 @@
 
     public SayaTubeVideo(String title)
     {
+        if (title == null)
+            throw new ArgumentNullException("Title tidak boleh null");
+
+        if (title.Length > 100)
+            throw new ArgumentException("Title terlalu panjang");
+
         Random random = new Random();
         this.id = random.Next(10000, 99999);
         this.title = title;
@@ -14,7 +22,22 @@
 
     public void IncreasePlayCount(int nonton)
     {
-        playCount += nonton;
+        if (nonton <= 0 || nonton > 10000000)
+            throw new ArgumentException("\nInput penambahan play count" +
+                " maksimal 10.000.000 per panggilan method-nya");
+
+        try
+        {
+            checked
+            {
+                playCount += nonton;
+            }
+        }
+        catch (OverflowException)
+        {
+            Console.WriteLine("-- SUDAH OVERFLOW --");
+            return;
+        }
     } 
 
     public void PrintVideoDetails()
@@ -30,7 +53,11 @@ public class Program
     public static void Main()
     {
         SayaTubeVideo vid = new SayaTubeVideo("Tutorial Design By Contract – Bella");
-        vid.IncreasePlayCount(5);
-        vid.PrintVideoDetails();
+
+        for (int i = 0; i < 215; i++)
+        {
+            vid.IncreasePlayCount(10000000);
+            vid.PrintVideoDetails();
+        }
     }
 }
